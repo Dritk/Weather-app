@@ -43,3 +43,17 @@ export const fetchFiveDayForecastByCity = async (
   if (!response.ok) throw new Error("City not found");
   return response.json();
 };
+
+{
+  /*
+export const fetchAqiByCoords = async (
+  lat: number,
+  lon: number
+): Promise<ForecastDataProps> => {
+  const response = await fetch(
+    `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+  );
+  if (!response.ok) throw new Error("AQI couldn't be fetched");
+  return response.json();
+}; */
+}

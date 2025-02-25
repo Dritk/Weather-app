@@ -7,6 +7,7 @@ import {
 } from "react-icons/bs";
 import { TiWeatherPartlySunny } from "react-icons/ti";
 import { MdCloudySnowing } from "react-icons/md";
+import { RiThunderstormsFill } from "react-icons/ri";
 
 const WeatherIcons = (weather: string) => {
   switch (weather) {
@@ -20,10 +21,14 @@ const WeatherIcons = (weather: string) => {
       return <BsCloudFog2Fill className="text-[#B9B2AA] text-6xl" />;
     case "Snow":
       return <MdCloudySnowing className="text-white text-6xl" />;
+
+    case "Thunderstorm":
+      return <RiThunderstormsFill className="text-gray-500 text-6xl" />;
     case "Haze":
       return (
         <BsCloudHazeFill className="text-gray-500 text-6xl animate-pulse animate-infinite" />
       );
+
     default:
       return <TiWeatherPartlySunny className="text-orange-300 text-6xl" />;
   }
