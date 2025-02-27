@@ -8,12 +8,19 @@ import { fetchWeatherByCity, fetchWeatherByCoords } from "../utils/api";
 import { fetchCountryName } from "../utils/CountryName";
 import WeatherIcons from "../utils/WeatherIcons";
 import Forecast from "./Forecast";
+import useCitySearch from "./useCitySearch";
+import useDebounce from "./useDebounce";
 
 const DisplayWeather = () => {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null
   );
   const [searchCity, setSearchCity] = useState("");
+
+  const debouncedSearch = useDebounce(searchCity, 300);
+
+  const { data: cities } = useCitySearch(debouncedSearch);
+
   const [city, setCity] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,10 +61,11 @@ const DisplayWeather = () => {
   });
 
   const handleSearch = (e?: React.KeyboardEvent) => {
-    if (e && /[0-9]/.test(e.key)) e.preventDefault();
+    if (e && /[0-9]/ && /[!@#$%^&*()_+\-=\[\]{};':"\\|.<>\/?]/.test(e.key))
+      e.preventDefault();
     if (!e || e.key === "Enter" || e.type === "click") {
-      if (searchCity.trim()) {
-        setCity(searchCity);
+      if (debouncedSearch.trim()) {
+        setCity(debouncedSearch);
         refetch();
       }
     }
@@ -82,6 +90,23 @@ const DisplayWeather = () => {
             <FaSearchLocation className="text-white text-xl" />
           </button>
         </div>
+
+        {cities && cities.length > 0 && (
+          <ul className=" bg-gray-700 border mt-1 w-full max-h-60 overflow-auto shadow-md">
+            {cities.map((city: any, index: number) => (
+              <li
+                key={index}
+                className="p-2 border-b cursor-pointer "
+                onClick={() => {
+                  setSearchCity(city.name);
+                  setCity(city.name);
+                }}
+              >
+                {city.name}, {city.country}
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="flex flex-col items-center justify-center flex-grow mt-8">
           {isLoading ? (

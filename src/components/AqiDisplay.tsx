@@ -1,7 +1,6 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AqiDataProps } from "../types/types";
-import { fetchAqiByCoords } from "../utils/api";
 
 interface AqiDisplayProps {
   lat: number;
@@ -64,3 +63,9 @@ const AqiDisplay: React.FC<AqiDisplayProps> = ({ lat, lon }) => {
 };
 
 export default AqiDisplay;
+function fetchAqiByCoords(
+  lat: number,
+  lon: number
+): AqiDataProps | Promise<AqiDataProps> {
+  throw new Error("Function not implemented.");
+}

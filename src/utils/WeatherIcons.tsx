@@ -1,36 +1,57 @@
-import {
-  BsFillSunFill,
-  BsCloudyFill,
-  BsFillCloudRainFill,
-  BsCloudFog2Fill,
-  BsCloudHazeFill,
-} from "react-icons/bs";
-import { TiWeatherPartlySunny } from "react-icons/ti";
-import { MdCloudySnowing } from "react-icons/md";
-import { RiThunderstormsFill } from "react-icons/ri";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 const WeatherIcons = (weather: string) => {
   switch (weather) {
     case "Clear":
-      return <BsFillSunFill className="text-yellow-400 text-6xl " />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="sunny2.lottie" loop autoplay />
+        </div>
+      );
     case "Clouds":
-      return <BsCloudyFill className="text-white text-6xl " />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="cloudy.lottie" loop autoplay />
+        </div>
+      );
     case "Rain":
-      return <BsFillCloudRainFill className="text-blue-400 text-6xl" />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="rain.lottie" loop autoplay />
+        </div>
+      );
     case "Fog":
-      return <BsCloudFog2Fill className="text-[#B9B2AA] text-6xl" />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="fog.lottie" loop autoplay />
+        </div>
+      );
     case "Snow":
-      return <MdCloudySnowing className="text-white text-6xl" />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="snow.lottie" loop autoplay />
+        </div>
+      );
 
     case "Thunderstorm":
-      return <RiThunderstormsFill className="text-gray-500 text-6xl" />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="Thunderstorm.lottie" loop autoplay />
+        </div>
+      );
     case "Haze":
       return (
-        <BsCloudHazeFill className="text-gray-500 text-6xl animate-pulse animate-infinite" />
+        <div className="w-32 h-32">
+          <DotLottieReact src="fog.lottie" loop autoplay />
+        </div>
       );
 
     default:
-      return <TiWeatherPartlySunny className="text-orange-300 text-6xl" />;
+      return (
+        <div className="w-32 h-32">
+          <DotLottieReact src="partlysunny.lottie" loop autoplay />
+        </div>
+      );
   }
 };
 

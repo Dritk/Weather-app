@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  fetchFiveDayForecastByCity,
-  fetchFiveDayForecastByCoords,
-} from "../utils/api";
 import { ForecastDataProps } from "../types/types";
 import WeatherIcons from "../utils/WeatherIcons";
+
+const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
+const API_URL = import.meta.env.VITE_WEATHER_API_URL;
 
 interface ForecastProps {
   city: string | null;
@@ -18,15 +17,24 @@ const Forecast = ({ city, location }: ForecastProps) => {
     error,
   } = useQuery<ForecastDataProps | null>({
     queryKey: ["forecast", city ?? location?.lat, city ?? location?.lon],
-    queryFn: () =>
-      city
-        ? fetchFiveDayForecastByCity(city)
-        : fetchFiveDayForecastByCoords(location!.lat, location!.lon),
+    queryFn: async () => {
+      const url = city
+        ? `${API_URL}/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
+        : `${API_URL}/data/2.5/forecast?lat=${location?.lat}&lon=${location?.lon}&appid=${API_KEY}&units=metric`;
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error("Failed to fetch forecast data");
+      }
+
+      return response.json();
+    },
     enabled: !!location || !!city,
   });
 
-  if (error instanceof Error)
+  if (error instanceof Error) {
     return <p>Error loading forecast: {error.message}</p>;
+  }
 
   const dailyForecast = forecastData?.list.filter(
     (_, index) => index % 8 === 0
