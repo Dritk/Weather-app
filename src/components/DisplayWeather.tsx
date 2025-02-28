@@ -10,6 +10,7 @@ import WeatherIcons from "../utils/WeatherIcons";
 import Forecast from "./Forecast";
 import useCitySearch from "./useCitySearch";
 import useDebounce from "./useDebounce";
+import AqiDisplay from "./AqiDisplay";
 
 const DisplayWeather = () => {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
@@ -72,7 +73,7 @@ const DisplayWeather = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-screen min-h-screen text-gray-200 p-6">
+    <div className="flex flex-col items-center justify-center  w-screen min-h-screen text-gray-200 p-6">
       <div className="flex flex-col items-center justify-center bg-slate-500  bg-cover text-gray-200 min-w-[40%] p-6 rounded-lg  flex-grow">
         <div className="relative w-full max-w-md flex items-center gap-2">
           <input
@@ -81,11 +82,11 @@ const DisplayWeather = () => {
             value={searchCity}
             onChange={(e) => setSearchCity(e.target.value)}
             onKeyDown={handleSearch}
-            className="w-full p-3 pl-4 rounded-lg bg-gray-800 text-gray-200 placeholder-white outline-none shadow-md backdrop-blur-lg"
+            className="w-full p-3 pl-4 rounded-2xl bg-gray-800 text-gray-200 placeholder-white outline-none shadow-md transition-all focus:ring-2 focus:ring-blue-500"
           />
           <button
             onClick={() => handleSearch()}
-            className="absolute right-3 bg-blue-500 p-2 rounded-lg shadow-lg hover:bg-blue-600 transition"
+            className="absolute right-3 bg-blue-500 p-2 rounded-full shadow-lg hover:bg-blue-600 transition-all transform hover:scale-105"
           >
             <FaSearchLocation className="text-white text-xl" />
           </button>
@@ -118,8 +119,8 @@ const DisplayWeather = () => {
           ) : (
             data && (
               <>
-                <div className="mt-8 p-6 bg-gray-800 rounded-2xl text-center w-full max-w-md">
-                  <h1 className="text-3xl font-bold">{data.name}</h1>
+                <div className="mt-8 p-6 bg-gray-800 rounded-2xl text-center w-full max-w-md shadow-lg">
+                  <h1 className="text-3xl font-bold text-white">{data.name}</h1>
                   <span className="text-lg text-gray-400">
                     {isCountryLoading ? "Loading..." : countryName}
                   </span>
@@ -128,7 +129,7 @@ const DisplayWeather = () => {
                     <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
                       {WeatherIcons(data.weather[0].main)}
                     </div>
-                    <h1 className="text-5xl font-bold mt-2">
+                    <h1 className="text-5xl font-bold mt-2 text-white">
                       {Math.round(data.main.temp)}°C
                     </h1>
                     <h2 className="text-xl text-gray-300">
@@ -160,6 +161,9 @@ const DisplayWeather = () => {
                 </div>
 
                 {data && <Forecast city={city} location={location} />}
+                {location && (
+                  <AqiDisplay lat={location.lat} lon={location.lon} />
+                )}
               </>
             )
           )}

@@ -1,71 +1,73 @@
-import React from "react";
 import { useQuery } from "@tanstack/react-query";
+import { fetchAqiByCoords } from "../utils/api";
+import { FaSmog } from "react-icons/fa";
+import { WiDust } from "react-icons/wi";
+import { IoWarningOutline } from "react-icons/io5";
 import { AqiDataProps } from "../types/types";
+import { useEffect } from "react";
 
 interface AqiDisplayProps {
   lat: number;
   lon: number;
 }
 
-const getAqiLevel = (aqi: number): { level: string; color: string } => {
-  switch (aqi) {
-    case 1:
-      return { level: "Good", color: "bg-green-500" };
-    case 2:
-      return { level: "Fair", color: "bg-yellow-500" };
-    case 3:
-      return { level: "Moderate", color: "bg-orange-500" };
-    case 4:
-      return { level: "Poor", color: "bg-red-500" };
-    case 5:
-      return { level: "Very Poor", color: "bg-purple-700" };
-    default:
-      return { level: "Unknown", color: "bg-gray-500" };
-  }
+const getAqiStatus = (aqi: number) => {
+  const status = [
+    { label: "Good", color: "text-green-500" },
+    { label: "Fair", color: "text-yellow-400" },
+    { label: "Moderate", color: "text-orange-500" },
+    { label: "Poor", color: "text-red-500" },
+    { label: "Very Poor", color: "text-purple-600" },
+  ];
+  return status[aqi - 1] || { label: "Unknown", color: "text-gray-500" };
 };
 
-const AqiDisplay: React.FC<AqiDisplayProps> = ({ lat, lon }) => {
-  const {
-    data: aqiData,
-    isLoading,
-    error,
-  } = useQuery<AqiDataProps>({
+const AqiDisplay = ({ lat, lon }: AqiDisplayProps) => {
+  const { data, isLoading, error, refetch } = useQuery<AqiDataProps>({
     queryKey: ["aqi", lat, lon],
     queryFn: () => fetchAqiByCoords(lat, lon),
-    enabled: !!lat && !!lon, // Ensure lat/lon are available before fetching
+    enabled: !!lat && !!lon,
+    staleTime: 0,
   });
 
-  if (isLoading) return <p className="text-gray-500">Loading AQI data...</p>;
-  if (error) return <p className="text-red-500">Failed to load AQI data</p>;
-  if (!aqiData || !aqiData.list || aqiData.list.length === 0) {
-    return <p className="text-gray-500">No AQI data available</p>;
-  }
+  useEffect(() => {
+    if (lat && lon) {
+      refetch();
+    }
+  }, [lat, lon, refetch]);
 
-  const aqi = aqiData.list[0].main.aqi;
-  const { level, color } = getAqiLevel(aqi);
+  if (isLoading) return <p className="text-gray-400">Loading AQI...</p>;
+  if (error) return <p className="text-red-500">Error loading AQI</p>;
+  if (!data) return <p className="text-gray-500">No AQI data available</p>;
+
+  const aqiLevel = data.list[0].main.aqi;
+  const status = getAqiStatus(aqiLevel);
 
   return (
-    <div className="p-4 rounded-lg shadow-md bg-white w-full max-w-sm">
-      <h2 className="text-lg font-semibold mb-2">Air Quality Index (AQI)</h2>
-      <div className={`text-white font-bold p-3 rounded ${color}`}>
-        AQI Level: {level} ({aqi})
+    <div className="bg-gray-800 p-4 rounded-xl shadow-lg flex flex-col items-center mt-1">
+      <h2 className="text-lg font-bold">Air Quality Index</h2>
+      <div className={`text-4xl ${status.color}`}>
+        {aqiLevel >= 4 ? <IoWarningOutline /> : <FaSmog />}
       </div>
-      <ul className="mt-4 text-sm">
-        <li>PM2.5: {aqiData.list[0].components.pm2_5} µg/m³</li>
-        <li>PM10: {aqiData.list[0].components.pm10} µg/m³</li>
-        <li>Ozone (O3): {aqiData.list[0].components.o3} µg/m³</li>
-        <li>CO: {aqiData.list[0].components.co} µg/m³</li>
-        <li>NO2: {aqiData.list[0].components.no2} µg/m³</li>
-        <li>SO2: {aqiData.list[0].components.so2} µg/m³</li>
-      </ul>
+      <h1 className={`text-2xl font-bold ${status.color}`}>{status.label}</h1>
+      <p className="text-gray-400">AQI Level: {aqiLevel}</p>
+
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="flex items-center">
+          <WiDust className="text-xl text-yellow-400" />
+          <p className="ml-1 text-gray-300">
+            PM2.5: {data.list[0].components.pm2_5} μg/m³
+          </p>
+        </div>
+        <div className="flex items-center">
+          <WiDust className="text-xl text-blue-400" />
+          <p className="ml-1 text-gray-300">
+            PM10: {data.list[0].components.pm10} μg/m³
+          </p>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default AqiDisplay;
-function fetchAqiByCoords(
-  lat: number,
-  lon: number
-): AqiDataProps | Promise<AqiDataProps> {
-  throw new Error("Function not implemented.");
-}

@@ -14,7 +14,7 @@ const Forecast = ({ city, location }: ForecastProps) => {
   const {
     data: forecastData,
     isLoading,
-    error,
+    isError,
   } = useQuery<ForecastDataProps | null>({
     queryKey: ["forecast", city ?? location?.lat, city ?? location?.lon],
     queryFn: async () => {
@@ -32,8 +32,8 @@ const Forecast = ({ city, location }: ForecastProps) => {
     enabled: !!location || !!city,
   });
 
-  if (error instanceof Error) {
-    return <p>Error loading forecast: {error.message}</p>;
+  if (isError) {
+    return <p>Error loading forecast</p>;
   }
 
   const dailyForecast = forecastData?.list.filter(

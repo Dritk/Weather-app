@@ -1,4 +1,8 @@
-import { WeatherDataProps, ForecastDataProps } from "../types/types";
+import {
+  WeatherDataProps,
+  ForecastDataProps,
+  AqiDataProps,
+} from "../types/types";
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const API_URL = import.meta.env.VITE_WEATHER_API_URL;
@@ -49,22 +53,21 @@ export const fetchCities = async (search: string) => {
   if (!search) return [];
 
   const response = await fetch(
-    `${API_URL}/geo/1.0/direct?q=${search}&limit=&appid=${API_KEY}`
+    `${API_URL}/geo/1.0/direct?q=${search}&limit=3&appid=${API_KEY}`
   );
   if (!response.ok) throw new Error("City not found");
   return response.json();
 };
 
-{
-  /*
 export const fetchAqiByCoords = async (
   lat: number,
   lon: number
-): Promise<ForecastDataProps> => {
+): Promise<AqiDataProps> => {
   const response = await fetch(
-    `${API_URL}/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
+    `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${API_KEY}`
   );
-  if (!response.ok) throw new Error("AQI couldn't be fetched");
+  if (!response.ok) {
+    throw new Error("Failed to fetch AQI data");
+  }
   return response.json();
-}; */
-}
+};
