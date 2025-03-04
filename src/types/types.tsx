@@ -1,9 +1,16 @@
 export interface WeatherDataProps {
   dt: number;
   name: string;
-  main: { temp: number; humidity: number };
-  sys: { country: string };
-  weather: { main: string }[];
+  main: {
+    temp: number;
+    humidity: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+    pressure: number;
+  };
+  sys: { country: string; sunrise: number; sunset: number };
+  weather: { main: string; description: string }[];
   wind: { speed: number };
   visibility: number;
 }

@@ -10,7 +10,6 @@ import WeatherIcons from "../utils/WeatherIcons";
 import Forecast from "./Forecast";
 import useCitySearch from "./useCitySearch";
 import useDebounce from "./useDebounce";
-import AqiDisplay from "./AqiDisplay";
 
 const DisplayWeather = () => {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
@@ -73,31 +72,29 @@ const DisplayWeather = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center  w-screen min-h-screen text-gray-200 p-6">
-      <div className="flex flex-col items-center justify-center bg-slate-500  bg-cover text-gray-200 min-w-[40%] p-6 rounded-lg  flex-grow">
-        <div className="relative w-full max-w-md flex items-center gap-2">
+    <div className="flex flex-row items-start  w-full min-h-screen text-gray-200 p-6 gap-6">
+      <div className="flex flex-col w-[30%] bg-[#3E3B3B] text-lg p-10 rounded-3xl h-full">
+        <div className="relative w-full max-w-md flex items-center ">
           <input
             type="text"
             placeholder="Enter a city"
             value={searchCity}
             onChange={(e) => setSearchCity(e.target.value)}
             onKeyDown={handleSearch}
-            className="w-full p-3 pl-4 rounded-2xl bg-gray-800 text-gray-200 placeholder-white outline-none shadow-md transition-all focus:ring-2 focus:ring-blue-500"
+            maxLength={30}
+            className="w-full p-3  rounded-2xl bg-[#C2D4D3] text-[#7E7C7C] placeholder-[#7E7C7C] font-medium"
           />
-          <button
-            onClick={() => handleSearch()}
-            className="absolute right-3 bg-blue-500 p-2 rounded-full shadow-lg hover:bg-blue-600 transition-all transform hover:scale-105"
-          >
-            <FaSearchLocation className="text-white text-xl" />
+          <button onClick={() => handleSearch()} className="absolute right-3">
+            <FaSearchLocation className="text-[#7E7C7C] text-xl" />
           </button>
         </div>
 
         {cities && cities.length > 0 && (
-          <ul className=" bg-gray-700 border mt-1 w-full max-h-60 overflow-auto shadow-md">
+          <ul className="bg-gray-700 border mt-1 w-full max-h-60 overflow-auto shadow-md">
             {cities.map((city: any, index: number) => (
               <li
                 key={index}
-                className="p-2 border-b cursor-pointer "
+                className="p-2 border-b cursor-pointer"
                 onClick={() => {
                   setSearchCity(city.name);
                   setCity(city.name);
@@ -109,9 +106,9 @@ const DisplayWeather = () => {
           </ul>
         )}
 
-        <div className="flex flex-col items-center justify-center flex-grow mt-8">
+        <div className="flex flex-col items-center justify-center gap-y-4  flex-grow">
           {isLoading ? (
-            <div className="w-24 h-24 mt-10 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
+            <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
               <FaSpinner className="animate-spin text-4xl text-blue-500" />
             </div>
           ) : error ? (
@@ -119,27 +116,45 @@ const DisplayWeather = () => {
           ) : (
             data && (
               <>
-                <div className="mt-8 p-6 bg-gray-800 rounded-2xl text-center w-full max-w-md shadow-lg">
-                  <h1 className="text-3xl font-bold text-white">{data.name}</h1>
-                  <span className="text-lg text-gray-400">
-                    {isCountryLoading ? "Loading..." : countryName}
-                  </span>
+                <div className="flex flex-col items-center">
+                  {WeatherIcons(data.weather[0].main)}
+                  <h2 className="text-4xl text-gray-300">
+                    {data.weather[0].main}
+                  </h2>
+                  <h1 className="text-5xl font-bold text-white">
+                    {Math.round(data.main.temp)}°C
+                  </h1>
+                </div>
 
-                  <div className="mt-4 flex flex-col items-center">
-                    <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
-                      {WeatherIcons(data.weather[0].main)}
-                    </div>
-                    <h1 className="text-5xl font-bold mt-2 text-white">
-                      {Math.round(data.main.temp)}°C
+                <div className="flex flex-col  justify-center mt-2">
+                  <div className="flex flex-row items-center justify-center gap-28">
+                    <h1 className="text-3xl font-bold text-white">
+                      {data.name}
                     </h1>
-                    <h2 className="text-xl text-gray-300">
-                      {data.weather[0].main}
-                    </h2>
+                    <span className="text-lg text-gray-400">
+                      {isCountryLoading ? "Loading..." : countryName}
+                    </span>
+                  </div>
+
+                  <hr className="mt-3 border-t-2 w-full " />
+
+                  <div className="text-left mt-6">
+                    <p className="text-gray-400">
+                      {data.weather[0].description}
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <img src="./minIcon.png" />
+                      Min Temp: {Math.round(data.main.temp_min)}°C
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <img src="./maxIcon.png" />
+                      Max Temp: {Math.round(data.main.temp_max)}°C
+                    </p>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-4 w-full max-w-md">
-                  <div className="flex items-center bg-gray-800 p-4 rounded-xl shadow-lg">
+                <div className="grid grid-cols-2 gap-4 w-full max-w-md bg-[#2C2929] rounded-3xl ">
+                  <div className="flex items-center p-4 rounded-xl">
                     <WiHumidity className="text-4xl text-teal-400 animate-bounce" />
                     <div className="ml-3">
                       <h1 className="text-xl font-semibold">
@@ -149,7 +164,7 @@ const DisplayWeather = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center bg-gray-800 p-4 rounded-xl shadow-lg">
+                  <div className="flex items-center p-4 rounded-xl">
                     <FaWind className="text-4xl text-blue-400 animate-pulse" />
                     <div className="ml-3">
                       <h1 className="text-xl font-semibold">
@@ -159,15 +174,16 @@ const DisplayWeather = () => {
                     </div>
                   </div>
                 </div>
-
-                {data && <Forecast city={city} location={location} />}
-                {location && (
-                  <AqiDisplay lat={location.lat} lon={location.lon} />
-                )}
               </>
             )
           )}
         </div>
+      </div>
+
+      <div className="flex flex-col w-[70%]  justify-center bg-[#3E3B3B]  text-lg bg-cover p-6 rounded-3xl h-full ">
+        {data && (
+          <Forecast city={city} location={location} weatherData={data} />
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { ForecastDataProps } from "../types/types";
+import { ForecastDataProps, WeatherDataProps } from "../types/types";
 import WeatherIcons from "../utils/WeatherIcons";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import AqiDisplay from "./AqiDisplay";
+import Card from "./Card";
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const API_URL = import.meta.env.VITE_WEATHER_API_URL;
@@ -8,9 +19,10 @@ const API_URL = import.meta.env.VITE_WEATHER_API_URL;
 interface ForecastProps {
   city: string | null;
   location: { lat: number; lon: number } | null;
+  weatherData: WeatherDataProps;
 }
 
-const Forecast = ({ city, location }: ForecastProps) => {
+const Forecast = ({ city, location, weatherData }: ForecastProps) => {
   const {
     data: forecastData,
     isLoading,
@@ -40,9 +52,19 @@ const Forecast = ({ city, location }: ForecastProps) => {
     (_, index) => index % 8 === 0
   );
 
+  const chartData = dailyForecast?.map((day) => ({
+    date: new Date(day.dt * 1000).toLocaleDateString("en-US", {
+      weekday: "short",
+    }),
+    temp: Math.round(day.main.temp),
+  }));
+
+  const minTemp = Math.min(...(chartData?.map((d) => d.temp) || [0]));
+  const maxTemp = Math.max(...(chartData?.map((d) => d.temp) || [40]));
+
   return (
-    <div className="mt-6 p-4 bg-gray-800 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold mb-2 text-center">5-Day Forecast</h2>
+    <div className="mt-2 p-4  ">
+      <h2 className="text-2xl font-semibold  mb-10  ">Week</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {isLoading ? (
           <div className="col-span-full flex justify-center items-center">
@@ -52,23 +74,108 @@ const Forecast = ({ city, location }: ForecastProps) => {
           dailyForecast?.map((day, index) => (
             <div
               key={index}
-              className="bg-gray-700 p-3 rounded-lg flex flex-col items-center"
+              className="bg-[#2C2929] p-3  flex flex-col items-center rounded-3xl"
             >
               <p className="text-gray-400">
                 {new Date(day.dt * 1000).toLocaleDateString("en-US", {
                   weekday: "short",
-                  month: "short",
-                  day: "numeric",
                 })}
               </p>
               <p className="text-lg font-bold">{Math.round(day.main.temp)}°C</p>
-              <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
+              <div className="w-24 h-24  rounded-full flex items-center justify-center text-4xl">
                 {WeatherIcons(day.weather[0].main)}
               </div>
               <p>{day.weather[0].main}</p>
             </div>
           ))
         )}
+      </div>
+
+      <div className="flex flex-col mt-12">
+        <h1 className="text-3xl mb-3">Today's Overview</h1>
+        <div className="flex flex-row items-center gap-2 mt-2 ">
+          {location && <AqiDisplay lat={location.lat} lon={location.lon} />}
+          <Card
+            heading="UV Index "
+            number={3}
+            text="Moderate"
+            imgSrc="./uvIcon.png"
+          />
+          <Card
+            heading="Pressure"
+            number={weatherData.main.pressure}
+            text="Normal"
+            imgSrc="./pressureIcon.png"
+          />
+        </div>
+
+        <div className="flex flex-row gap-2 mt-6">
+          <div className=" bg-[#2C2929] p-6 rounded-3xl w-full  ">
+            <h3 className="text-lg mb-4">Temperature Trend</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chartData}>
+                <CartesianGrid
+                  horizontal={true}
+                  vertical={false}
+                  strokeDasharray="3"
+                />
+                <XAxis dataKey="date" tick={{ fill: "#ffffff" }} />
+                <YAxis
+                  tick={{ fill: "#ffffff" }}
+                  domain={[minTemp - 5, maxTemp + 5]}
+                />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="temp"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="bg-[#2C2929] w-full md:w-[45%] p-6 rounded-3xl flex flex-col justify-between min-h-40">
+            <h3 className="text-lg ">Sunrise & Sunset</h3>
+
+            <div className="flex items-center gap-4 w-full">
+              <img
+                src="./sunriseIcon.png"
+                alt="Sunrise"
+                className="w-14 h-14"
+              />
+              <div className="text-left">
+                <p className="text-gray-400 text-sm">Sunrise</p>
+                <p className="text-2xl font-semibold text-white">
+                  {new Date(
+                    weatherData?.sys?.sunrise * 1000
+                  ).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center  gap-4 w-full mt-4">
+              <img src="./sunsetIcon.png" alt="Sunset" className="w-14 h-14" />
+              <div className="text-left">
+                <p className="text-gray-400 text-sm">Sunset</p>
+                <p className="text-2xl font-semibold text-white">
+                  {new Date(weatherData?.sys?.sunset * 1000).toLocaleTimeString(
+                    "en-US",
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    }
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAqiByCoords } from "../utils/api";
-import { FaSmog } from "react-icons/fa";
-import { WiDust } from "react-icons/wi";
-import { IoWarningOutline } from "react-icons/io5";
+// import { FaSmog } from "react-icons/fa";
+// import { WiDust } from "react-icons/wi";
+// import { IoWarningOutline } from "react-icons/io5";
 import { AqiDataProps } from "../types/types";
 import { useEffect } from "react";
+import Card from "./Card";
 
 interface AqiDisplayProps {
   lat: number;
@@ -44,8 +45,15 @@ const AqiDisplay = ({ lat, lon }: AqiDisplayProps) => {
   const status = getAqiStatus(aqiLevel);
 
   return (
-    <div className="bg-gray-800 p-4 rounded-xl shadow-lg flex flex-col items-center mt-1">
-      <h2 className="text-lg font-bold">Air Quality Index</h2>
+    <div className="flex flex-row w-full">
+      <Card
+        heading="Air Quality Index"
+        number={aqiLevel}
+        text={status.label}
+        imgSrc="./aqiIcon.png"
+      />
+
+      {/* <h2 className="text-lg font-bold">Air Quality Index</h2>
       <div className={`text-4xl ${status.color}`}>
         {aqiLevel >= 4 ? <IoWarningOutline /> : <FaSmog />}
       </div>
@@ -65,7 +73,7 @@ const AqiDisplay = ({ lat, lon }: AqiDisplayProps) => {
             PM10: {data.list[0].components.pm10} μg/m³
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

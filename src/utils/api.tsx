@@ -3,9 +3,10 @@ import {
   ForecastDataProps,
   AqiDataProps,
 } from "../types/types";
-//Api KEy
+
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const API_URL = import.meta.env.VITE_WEATHER_API_URL;
+const UNSPLASH_ACCESS_KEY = import.meta.env.VITE_UNSPLASH_API_KEY;
 
 export const fetchWeatherByCoords = async (
   lat: number,
@@ -70,4 +71,17 @@ export const fetchAqiByCoords = async (
     throw new Error("Failed to fetch AQI data");
   }
   return response.json();
+};
+
+export const fetchCityImage = async (city: string) => {
+  if (!city) return null;
+
+  const response = await fetch(
+    `https://api.unsplash.com/search/photos?query=${city}&client_id=${UNSPLASH_ACCESS_KEY}&per_page=1`
+  );
+
+  if (!response.ok) throw new Error("Image not found");
+
+  const data = await response.json();
+  return data.results.length > 0 ? data.results[0].urls.regular : null;
 };
