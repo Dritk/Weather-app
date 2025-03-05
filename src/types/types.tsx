@@ -1,6 +1,10 @@
 export interface WeatherDataProps {
   dt: number;
   name: string;
+  coord: {
+    lon: number;
+    lat: number;
+  };
   main: {
     temp: number;
     humidity: number;
@@ -35,10 +39,7 @@ export interface ForecastDataProps {
 }
 
 export interface AqiDataProps {
-  coord: {
-    lon: number;
-    lat: number;
-  };
+  city: string;
   list: {
     dt: number;
     main: {

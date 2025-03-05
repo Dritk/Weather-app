@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { ForecastDataProps, WeatherDataProps } from "../types/types";
-import WeatherIcons from "../utils/WeatherIcons";
+import { ForecastDataProps, WeatherDataProps } from "../../types/types";
+import WeatherIcons from "../../utils/WeatherIcons";
 import {
   CartesianGrid,
   Line,
@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import AqiDisplay from "./AqiDisplay";
-import Card from "./Card";
+import Card from "../Card";
 
 const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const API_URL = import.meta.env.VITE_WEATHER_API_URL;
@@ -63,9 +63,9 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
   const maxTemp = Math.max(...(chartData?.map((d) => d.temp) || [40]));
 
   return (
-    <div className="mt-2 p-4  ">
-      <h2 className="text-2xl font-semibold  mb-10  ">Week</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="mt-2 p-4">
+      <h2 className="text-2xl font-semibold mb-6">Week</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
         {isLoading ? (
           <div className="col-span-full flex justify-center items-center">
             <div className="loader">Loading forecast...</div>
@@ -74,43 +74,48 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
           dailyForecast?.map((day, index) => (
             <div
               key={index}
-              className="bg-[#2C2929] p-3  flex flex-col items-center rounded-3xl"
+              className="bg-[#2C2929] p-3 flex flex-col items-center w-full rounded-3xl"
             >
-              <p className="text-gray-400">
+              <p className="text-gray-400 text-lg">
                 {new Date(day.dt * 1000).toLocaleDateString("en-US", {
                   weekday: "short",
                 })}
               </p>
               <p className="text-lg font-bold">{Math.round(day.main.temp)}°C</p>
-              <div className="w-24 h-24  rounded-full flex items-center justify-center text-4xl">
+              <div className="w-24 h-24  rounded-full flex items-center justify-center text-4xl ">
                 {WeatherIcons(day.weather[0].main)}
               </div>
-              <p>{day.weather[0].main}</p>
+              <p className="text-lg">{day.weather[0].main}</p>
             </div>
           ))
         )}
       </div>
 
       <div className="flex flex-col mt-12">
-        <h1 className="text-3xl mb-3">Today's Overview</h1>
-        <div className="flex flex-row items-center gap-2 mt-2 ">
-          {location && <AqiDisplay lat={location.lat} lon={location.lon} />}
+        <h2 className="text-2xl lg:text-3xl mb-3">Today's Overview</h2>
+        <div className="flex flex-col sm:flex-row items-stretch gap-4 mt-2">
+          {location && (
+            <AqiDisplay
+              lat={weatherData.coord.lat}
+              lon={weatherData.coord.lon}
+            />
+          )}
           <Card
-            heading="UV Index "
+            heading="UV Index"
             number={3}
             text="Moderate"
-            imgSrc="./uvIcon.png"
+            imgSrc="./Icons/uvIcon.png"
           />
           <Card
             heading="Pressure"
             number={weatherData.main.pressure}
             text="Normal"
-            imgSrc="./pressureIcon.png"
+            imgSrc="./Icons/pressureIcon.png"
           />
         </div>
 
-        <div className="flex flex-row gap-2 mt-6">
-          <div className=" bg-[#2C2929] p-6 rounded-3xl w-full  ">
+        <div className="flex flex-row  gap-4 mt-6">
+          <div className="bg-[#2C2929] p-6 rounded-3xl w-full lg:w-2/3">
             <h3 className="text-lg mb-4">Temperature Trend</h3>
             <ResponsiveContainer width="100%" height={200}>
               <LineChart data={chartData}>
@@ -135,18 +140,18 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-[#2C2929] w-full md:w-[45%] p-6 rounded-3xl flex flex-col justify-between min-h-40">
-            <h3 className="text-lg ">Sunrise & Sunset</h3>
+          <div className="bg-[#2C2929] w-full lg:w-1/3 p-6 rounded-3xl flex flex-col justify-between ">
+            <h3 className="text-lg">Sunrise & Sunset</h3>
 
-            <div className="flex items-center gap-4 w-full">
+            <div className="flex gap-4 w-full">
               <img
-                src="./sunriseIcon.png"
+                src="./Icons/sunriseIcon.png"
                 alt="Sunrise"
-                className="w-14 h-14"
+                className="w-10 h-10 lg:w-14 lg:h-14"
               />
               <div className="text-left">
                 <p className="text-gray-400 text-sm">Sunrise</p>
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-xl lg:text-2xl font-semibold text-white">
                   {new Date(
                     weatherData?.sys?.sunrise * 1000
                   ).toLocaleTimeString("en-US", {
@@ -158,11 +163,15 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
               </div>
             </div>
 
-            <div className="flex items-center  gap-4 w-full mt-4">
-              <img src="./sunsetIcon.png" alt="Sunset" className="w-14 h-14" />
+            <div className="flex items-center gap-4 w-full ">
+              <img
+                src="./Icons/sunsetIcon.png"
+                alt="Sunset"
+                className="w-10 h-10 lg:w-14 lg:h-14"
+              />
               <div className="text-left">
                 <p className="text-gray-400 text-sm">Sunset</p>
-                <p className="text-2xl font-semibold text-white">
+                <p className="text-xl lg:text-2xl font-semibold text-white">
                   {new Date(weatherData?.sys?.sunset * 1000).toLocaleTimeString(
                     "en-US",
                     {

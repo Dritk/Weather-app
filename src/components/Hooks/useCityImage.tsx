@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchCityImage } from "../utils/api";
+import { fetchCityImage } from "../../utils/api";
 
 export const useCityImage = (city: string) => {
   return useQuery({

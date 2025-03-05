@@ -3,11 +3,13 @@ const Card = ({
   number,
   text,
   imgSrc,
+  color,
 }: {
   heading: string;
   number: number;
   text: string;
   imgSrc?: string;
+  color?: string;
 }) => {
   return (
     <div className="bg-[#2C2929] p-6 rounded-3xl shadow-lg  w-full relative">
@@ -15,7 +17,7 @@ const Card = ({
 
       <p className="text-4xl font-bold text-white mt-2">{number}</p>
 
-      <p className="text-sm text-gray-400 mt-4">{text}</p>
+      <p className={`text-sm mt-4 ${color}`}>{text}</p>
 
       {imgSrc && (
         <div className="mt-4 flex justify-center">

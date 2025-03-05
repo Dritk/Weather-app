@@ -7,9 +7,9 @@ import { WeatherDataProps } from "../types/types";
 import { fetchWeatherByCity, fetchWeatherByCoords } from "../utils/api";
 import { fetchCountryName } from "../utils/CountryName";
 import WeatherIcons from "../utils/WeatherIcons";
-import Forecast from "./Forecast";
-import useCitySearch from "./useCitySearch";
-import useDebounce from "./useDebounce";
+import Forecast from "./Forecast Section/Forecast";
+import useCitySearch from "./Hooks/useCitySearch";
+import useDebounce from "./Hooks/useDebounce";
 
 const DisplayWeather = () => {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
@@ -72,9 +72,11 @@ const DisplayWeather = () => {
   };
 
   return (
-    <div className="flex flex-row items-start  w-full min-h-screen text-gray-200 p-6 gap-6">
-      <div className="flex flex-col w-[30%] bg-[#3E3B3B] text-lg p-10 rounded-3xl h-full">
-        <div className="relative w-full max-w-md flex items-center ">
+    <div className="flex flex-col lg:flex-row items-start w-full  text-gray-200 p-4 lg:p-6 gap-4 lg:gap-6  ">
+      {/* Left Column */}
+      <div className="flex flex-col w-full lg:w-[30%] bg-[#3E3B3B] text-lg p-6 lg:p-10 rounded-3xl h-full ">
+        {/* Search Bar */}
+        <div className="relative w-full  flex items-center mb-4">
           <input
             type="text"
             placeholder="Enter a city"
@@ -82,7 +84,7 @@ const DisplayWeather = () => {
             onChange={(e) => setSearchCity(e.target.value)}
             onKeyDown={handleSearch}
             maxLength={30}
-            className="w-full p-3  rounded-2xl bg-[#C2D4D3] text-[#7E7C7C] placeholder-[#7E7C7C] font-medium"
+            className="w-full p-3 rounded-3xl bg-[#C2D4D3] text-[#7E7C7C] placeholder-[#7E7C7C] font-medium"
           />
           <button onClick={() => handleSearch()} className="absolute right-3">
             <FaSearchLocation className="text-[#7E7C7C] text-xl" />
@@ -90,11 +92,11 @@ const DisplayWeather = () => {
         </div>
 
         {cities && cities.length > 0 && (
-          <ul className="bg-gray-700 border mt-1 w-full max-h-60 overflow-auto shadow-md">
+          <ul className="bg-[#2C2929] border mt-1 w-full max-h-60 overflow-auto shadow-md rounded-3xl mb-4">
             {cities.map((city: any, index: number) => (
               <li
                 key={index}
-                className="p-2 border-b cursor-pointer"
+                className="p-2 border-b cursor-pointer hover:bg-[#3E3B3B]"
                 onClick={() => {
                   setSearchCity(city.name);
                   setCity(city.name);
@@ -106,9 +108,10 @@ const DisplayWeather = () => {
           </ul>
         )}
 
-        <div className="flex flex-col items-center justify-center gap-y-4  flex-grow">
+        {/* Weather Information */}
+        <div className="flex flex-col items-center justify-center gap-y-10 ">
           {isLoading ? (
-            <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
+            <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl ">
               <FaSpinner className="animate-spin text-4xl text-blue-500" />
             </div>
           ) : error ? (
@@ -118,59 +121,73 @@ const DisplayWeather = () => {
               <>
                 <div className="flex flex-col items-center">
                   {WeatherIcons(data.weather[0].main)}
-                  <h2 className="text-4xl text-gray-300">
+                  <h1 className="text-2xl lg:text-4xl text-gray-300">
                     {data.weather[0].main}
-                  </h2>
-                  <h1 className="text-5xl font-bold text-white">
-                    {Math.round(data.main.temp)}°C
                   </h1>
+                  <h2 className="text-4xl lg:text-8xl font-bold text-white">
+                    {Math.round(data.main.temp)}°C
+                  </h2>
                 </div>
 
-                <div className="flex flex-col  justify-center mt-2">
-                  <div className="flex flex-row items-center justify-center gap-28">
-                    <h1 className="text-3xl font-bold text-white">
+                <div className="flex flex-col justify-center mt-2">
+                  <div className="flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-28">
+                    <p className="text-2xl lg:text-3xl font-bold text-white">
                       {data.name}
-                    </h1>
+                    </p>
                     <span className="text-lg text-gray-400">
                       {isCountryLoading ? "Loading..." : countryName}
                     </span>
                   </div>
 
-                  <hr className="mt-3 border-t-2 w-full " />
+                  <hr className="mt-3 border-t-2 w-full" />
 
                   <div className="text-left mt-6">
-                    <p className="text-gray-400">
+                    <p className="text-gray-400 text-center lg:text-left">
                       {data.weather[0].description}
                     </p>
-                    <p className="flex items-center gap-2">
-                      <img src="./minIcon.png" />
-                      Min Temp: {Math.round(data.main.temp_min)}°C
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <img src="./maxIcon.png" />
-                      Max Temp: {Math.round(data.main.temp_max)}°C
-                    </p>
+                    <div className="flex flex-col items-center lg:items-start">
+                      <p className="flex items-center gap-2 mt-2">
+                        <img
+                          src="./Icons/minIcon.png"
+                          alt="Min Temp"
+                          className="w-5 h-5"
+                        />
+                        Minimum Temperature- {Math.round(data.main.temp_min)}°C
+                      </p>
+                      <p className="flex items-center gap-2 mt-2">
+                        <img
+                          src="./Icons/maxIcon.png"
+                          alt="Max Temp"
+                          className="w-5 h-5"
+                        />
+                        Maximum Temperature- {Math.round(data.main.temp_max)}°C
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 w-full max-w-md bg-[#2C2929] rounded-3xl ">
-                  <div className="flex items-center p-4 rounded-xl">
-                    <WiHumidity className="text-4xl text-teal-400 animate-bounce" />
+                <div className="grid grid-cols-2 gap-4 w-full max-w-md bg-[#2C2929] rounded-3xl p-4">
+                  <div className="flex items-center">
+                    <WiHumidity className="text-2xl lg:text-4xl text-teal-400 animate-bounce" />
                     <div className="ml-3">
-                      <h1 className="text-xl font-semibold">
+                      <p className="text-lg lg:text-xl font-semibold">
                         {data.main.humidity}%
-                      </h1>
-                      <p className="text-gray-400">Humidity</p>
+                      </p>
+                      <p className="text-gray-400 text-sm lg:text-base">
+                        Humidity
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center p-4 rounded-xl">
-                    <FaWind className="text-4xl text-blue-400 animate-pulse" />
+                  <div className="flex items-center">
+                    <FaWind className="text-2xl lg:text-4xl text-blue-400 animate-pulse" />
                     <div className="ml-3">
-                      <h1 className="text-xl font-semibold">
+                      <p className="text-lg lg:text-xl font-semibold">
                         {data.wind.speed} km/h
-                      </h1>
-                      <p className="text-gray-400">Wind Speed</p>
+                      </p>
+                      <p className="text-gray-400 text-sm lg:text-base">
+                        Wind Speed
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -180,7 +197,8 @@ const DisplayWeather = () => {
         </div>
       </div>
 
-      <div className="flex flex-col w-[70%]  justify-center bg-[#3E3B3B]  text-lg bg-cover p-6 rounded-3xl h-full ">
+      {/* Right Column - Forecast */}
+      <div className="flex flex-col w-full lg:w-[70%] bg-[#3E3B3B] text-lg p-4 lg:p-6 rounded-3xl h-full ">
         {data && (
           <Forecast city={city} location={location} weatherData={data} />
         )}
