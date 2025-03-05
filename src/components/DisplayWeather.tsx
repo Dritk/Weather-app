@@ -37,15 +37,16 @@ const DisplayWeather = () => {
     );
   }, []);
 
+  const fetchWeather = () => {
+    if (city) return fetchWeatherByCity(city);
+    if (location) return fetchWeatherByCoords(location.lat, location.lon);
+    return null;
+  };
+
   const { data, isLoading, error, refetch } = useQuery<WeatherDataProps | null>(
     {
       queryKey: ["weather", city ?? location?.lat, city ?? location?.lon],
-      queryFn: () =>
-        city
-          ? fetchWeatherByCity(city)
-          : location
-          ? fetchWeatherByCoords(location.lat, location.lon)
-          : null,
+      queryFn: fetchWeather,
       enabled: !!location || !!city,
       refetchInterval: 5 * 60 * 1000,
     }
@@ -61,7 +62,7 @@ const DisplayWeather = () => {
   });
 
   const handleSearch = (e?: React.KeyboardEvent) => {
-    if (e && /[0-9]/ && /[!@#$%^&*()_+\-=\[\]{};':"\\|.<>\/?]/.test(e.key))
+    if (e && /\d|[!@#$%^&*()_+\-=[\]{};':"\\|.<>/?]/.test(e.key))
       e.preventDefault();
     if (!e || e.key === "Enter" || e.type === "click") {
       if (debouncedSearch.trim()) {
@@ -93,106 +94,118 @@ const DisplayWeather = () => {
 
         {cities && cities.length > 0 && (
           <ul className="bg-[#2C2929] border mt-1 w-full max-h-60 overflow-auto shadow-md rounded-3xl mb-4">
-            {cities.map((city: any, index: number) => (
+            {cities.map((city: any) => (
               <li
-                key={index}
-                className="p-2 border-b cursor-pointer hover:bg-[#3E3B3B]"
-                onClick={() => {
-                  setSearchCity(city.name);
-                  setCity(city.name);
-                }}
+                key={`${city.name}-${city.country}`} // Unique key
+                className="p-2 border-b hover:bg-[#3E3B3B]"
               >
-                {city.name}, {city.country}
+                <button
+                  className="w-full text-left cursor-pointer"
+                  onClick={() => {
+                    setSearchCity(city.name);
+                    setCity(city.name);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      setSearchCity(city.name);
+                      setCity(city.name);
+                    }
+                  }}
+                >
+                  {city.name}, {city.country}
+                </button>
               </li>
             ))}
           </ul>
         )}
 
         {/* Weather Information */}
-        <div className="flex flex-col items-center justify-center gap-y-10 ">
-          {isLoading ? (
-            <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl ">
+        <div className="flex flex-col items-center justify-center gap-y-10">
+          {isLoading && (
+            <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-4xl">
               <FaSpinner className="animate-spin text-4xl text-blue-500" />
             </div>
-          ) : error ? (
+          )}
+
+          {!isLoading && error && (
             <h2 className="text-red-500">Error: {error.message}</h2>
-          ) : (
-            data && (
-              <>
-                <div className="flex flex-col items-center">
-                  {WeatherIcons(data.weather[0].main)}
-                  <h1 className="text-2xl lg:text-4xl text-gray-300">
-                    {data.weather[0].main}
-                  </h1>
-                  <h2 className="text-4xl lg:text-8xl font-bold text-white">
-                    {Math.round(data.main.temp)}°C
-                  </h2>
+          )}
+
+          {!isLoading && !error && data && (
+            <>
+              <div className="flex flex-col items-center">
+                {WeatherIcons(data.weather[0].main)}
+                <h1 className="text-2xl lg:text-4xl text-gray-300">
+                  {data.weather[0].main}
+                </h1>
+                <h2 className="text-4xl lg:text-8xl font-bold text-white">
+                  {Math.round(data.main.temp)}°C
+                </h2>
+              </div>
+
+              <div className="flex flex-col justify-center mt-2">
+                <div className="flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-28">
+                  <p className="text-2xl lg:text-3xl font-bold text-white">
+                    {data.name}
+                  </p>
+                  <span className="text-lg text-gray-400">
+                    {isCountryLoading ? "Loading..." : countryName}
+                  </span>
                 </div>
 
-                <div className="flex flex-col justify-center mt-2">
-                  <div className="flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-28">
-                    <p className="text-2xl lg:text-3xl font-bold text-white">
-                      {data.name}
+                <hr className="mt-3 border-t-2 w-full" />
+
+                <div className="text-left mt-6">
+                  <p className="text-gray-400 text-center lg:text-left">
+                    {data.weather[0].description}
+                  </p>
+                  <div className="flex flex-col items-center lg:items-start">
+                    <p className="flex items-center gap-2 mt-2">
+                      <img
+                        src="./Icons/minIcon.png"
+                        alt="Min Temp"
+                        className="w-5 h-5"
+                      />
+                      Minimum Temperature- {Math.round(data.main.temp_min)}°C
                     </p>
-                    <span className="text-lg text-gray-400">
-                      {isCountryLoading ? "Loading..." : countryName}
-                    </span>
-                  </div>
-
-                  <hr className="mt-3 border-t-2 w-full" />
-
-                  <div className="text-left mt-6">
-                    <p className="text-gray-400 text-center lg:text-left">
-                      {data.weather[0].description}
+                    <p className="flex items-center gap-2 mt-2">
+                      <img
+                        src="./Icons/maxIcon.png"
+                        alt="Max Temp"
+                        className="w-5 h-5"
+                      />
+                      Maximum Temperature- {Math.round(data.main.temp_max)}°C
                     </p>
-                    <div className="flex flex-col items-center lg:items-start">
-                      <p className="flex items-center gap-2 mt-2">
-                        <img
-                          src="./Icons/minIcon.png"
-                          alt="Min Temp"
-                          className="w-5 h-5"
-                        />
-                        Minimum Temperature- {Math.round(data.main.temp_min)}°C
-                      </p>
-                      <p className="flex items-center gap-2 mt-2">
-                        <img
-                          src="./Icons/maxIcon.png"
-                          alt="Max Temp"
-                          className="w-5 h-5"
-                        />
-                        Maximum Temperature- {Math.round(data.main.temp_max)}°C
-                      </p>
-                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 w-full max-w-md bg-[#2C2929] rounded-3xl p-4">
+                <div className="flex items-center">
+                  <WiHumidity className="text-2xl lg:text-4xl text-teal-400 animate-bounce" />
+                  <div className="ml-3">
+                    <p className="text-lg lg:text-xl font-semibold">
+                      {data.main.humidity}%
+                    </p>
+                    <p className="text-gray-400 text-sm lg:text-base">
+                      Humidity
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 w-full max-w-md bg-[#2C2929] rounded-3xl p-4">
-                  <div className="flex items-center">
-                    <WiHumidity className="text-2xl lg:text-4xl text-teal-400 animate-bounce" />
-                    <div className="ml-3">
-                      <p className="text-lg lg:text-xl font-semibold">
-                        {data.main.humidity}%
-                      </p>
-                      <p className="text-gray-400 text-sm lg:text-base">
-                        Humidity
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center">
-                    <FaWind className="text-2xl lg:text-4xl text-blue-400 animate-pulse" />
-                    <div className="ml-3">
-                      <p className="text-lg lg:text-xl font-semibold">
-                        {data.wind.speed} km/h
-                      </p>
-                      <p className="text-gray-400 text-sm lg:text-base">
-                        Wind Speed
-                      </p>
-                    </div>
+                <div className="flex items-center">
+                  <FaWind className="text-2xl lg:text-4xl text-blue-400 animate-pulse" />
+                  <div className="ml-3">
+                    <p className="text-lg lg:text-xl font-semibold">
+                      {data.wind.speed} km/h
+                    </p>
+                    <p className="text-gray-400 text-sm lg:text-base">
+                      Wind Speed
+                    </p>
                   </div>
                 </div>
-              </>
-            )
+              </div>
+            </>
           )}
         </div>
       </div>

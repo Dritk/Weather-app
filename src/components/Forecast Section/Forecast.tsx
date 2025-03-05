@@ -71,9 +71,9 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
             <div className="loader">Loading forecast...</div>
           </div>
         ) : (
-          dailyForecast?.map((day, index) => (
+          dailyForecast?.map((day) => (
             <div
-              key={index}
+              key={day.dt}
               className="bg-[#2C2929] p-3 flex flex-col items-center w-full rounded-3xl"
             >
               <p className="text-gray-400 text-lg">

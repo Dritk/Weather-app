@@ -20,12 +20,14 @@ const WeatherIcons = (weather: string) => {
           <DotLottieReact src="rain.lottie" loop autoplay />
         </div>
       );
+
     case "Fog":
       return (
         <div className="w-56 h-56">
-          <DotLottieReact src="fog.lottie" loop autoplay />
+          <img src="/Icons/fog.png" alt="fog" />
         </div>
       );
+
     case "Snow":
       return (
         <div className="w-56 h-56">
@@ -39,6 +41,7 @@ const WeatherIcons = (weather: string) => {
           <DotLottieReact src="Thunderstorm.lottie" loop autoplay />
         </div>
       );
+
     case "Haze":
       return (
         <div className="w-56 h-56">
