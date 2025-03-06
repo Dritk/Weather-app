@@ -12,9 +12,10 @@ import {
 } from "recharts";
 import AqiDisplay from "./AqiDisplay";
 import Card from "../Card";
-
-const API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
-const API_URL = import.meta.env.VITE_WEATHER_API_URL;
+import {
+  fetchFiveDayForecastByCity,
+  fetchFiveDayForecastByCoords,
+} from "../../utils/api";
 
 interface ForecastProps {
   city: string | null;
@@ -23,24 +24,20 @@ interface ForecastProps {
 }
 
 const Forecast = ({ city, location, weatherData }: ForecastProps) => {
+  const fetchForecast = () => {
+    if (city) return fetchFiveDayForecastByCity(city); //Fetchs the 5 day forecast based on the city.
+    if (location)
+      return fetchFiveDayForecastByCoords(location.lat, location.lon); //Fetchs the 5 day forecast of current location of the user.
+    return null;
+  };
+
   const {
     data: forecastData,
     isLoading,
     isError,
   } = useQuery<ForecastDataProps | null>({
     queryKey: ["forecast", city ?? location?.lat, city ?? location?.lon],
-    queryFn: async () => {
-      const url = city
-        ? `${API_URL}/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=metric`
-        : `${API_URL}/data/2.5/forecast?lat=${location?.lat}&lon=${location?.lon}&appid=${API_KEY}&units=metric`;
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch forecast data");
-      }
-
-      return response.json();
-    },
+    queryFn: fetchForecast,
     enabled: !!location || !!city,
   });
 
@@ -48,6 +45,7 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
     return <p>Error loading forecast</p>;
   }
 
+  //Filter the forecast data to get one entry per day (every 8th entry represents a full day)
   const dailyForecast = forecastData?.list.filter(
     (_, index) => index % 8 === 0
   );
@@ -59,6 +57,7 @@ const Forecast = ({ city, location, weatherData }: ForecastProps) => {
     temp: Math.round(day.main.temp),
   }));
 
+  //To make the chart feel
   const minTemp = Math.min(...(chartData?.map((d) => d.temp) || [0]));
   const maxTemp = Math.max(...(chartData?.map((d) => d.temp) || [40]));
 

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAqiByCoords } from "../../utils/api";
 import { AqiDataProps } from "../../types/types";
-import { useEffect } from "react";
+
 import Card from "../Card";
 
 interface AqiDisplayProps {
@@ -21,18 +21,11 @@ const getAqiStatus = (aqi: number) => {
 };
 
 const AqiDisplay = ({ lat, lon }: AqiDisplayProps) => {
-  const { data, isLoading, error, refetch } = useQuery<AqiDataProps>({
+  const { data, isLoading, error } = useQuery<AqiDataProps>({
     queryKey: ["aqi", lat, lon],
     queryFn: () => fetchAqiByCoords(lat, lon),
     enabled: !!lat && !!lon,
-    staleTime: 0,
   });
-
-  useEffect(() => {
-    if (lat && lon) {
-      refetch();
-    }
-  }, [lat, lon, refetch]);
 
   if (isLoading) return <p className="text-gray-400">Loading AQI...</p>;
   if (error) return <p className="text-red-500">Error loading AQI</p>;

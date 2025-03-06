@@ -1,26 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { FaSearchLocation, FaSpinner } from "react-icons/fa";
+import { FaSpinner } from "react-icons/fa";
 import { FaWind } from "react-icons/fa6";
 import { WiHumidity } from "react-icons/wi";
 import { WeatherDataProps } from "../types/types";
 import { fetchWeatherByCity, fetchWeatherByCoords } from "../utils/api";
 import { fetchCountryName } from "../utils/CountryName";
 import WeatherIcons from "../utils/WeatherIcons";
-import Forecast from "./Forecast Section/Forecast";
-import useCitySearch from "./Hooks/useCitySearch";
-import useDebounce from "./Hooks/useDebounce";
+import Forecast from "./Forecast_Section/Forecast";
+import SearchBar from "./SearchBar";
 
 const DisplayWeather = () => {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(
     null
   );
-  const [searchCity, setSearchCity] = useState("");
-
-  const debouncedSearch = useDebounce(searchCity, 300);
-
-  const { data: cities } = useCitySearch(debouncedSearch);
-
   const [city, setCity] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,11 +28,11 @@ const DisplayWeather = () => {
         console.error("Geolocation error:", error);
       }
     );
-  }, []);
+  }, []); //For current location of the user.
 
   const fetchWeather = () => {
-    if (city) return fetchWeatherByCity(city);
-    if (location) return fetchWeatherByCoords(location.lat, location.lon);
+    if (city) return fetchWeatherByCity(city); //Fetchs when a city is searched.
+    if (location) return fetchWeatherByCoords(location.lat, location.lon); //Fetchs the current location of the user.
     return null;
   };
 
@@ -52,6 +45,7 @@ const DisplayWeather = () => {
     }
   );
 
+  //For displaying the full city name as api only provides code.
   const { data: countryName, isLoading: isCountryLoading } = useQuery({
     queryKey: ["countryName", data?.sys.country],
     queryFn: () =>
@@ -61,63 +55,17 @@ const DisplayWeather = () => {
     enabled: !!data?.sys.country,
   });
 
-  const handleSearch = (e?: React.KeyboardEvent) => {
-    if (e && /\d|[!@#$%^&*()_+\-=[\]{};':"\\|.<>/?]/.test(e.key))
-      e.preventDefault();
-    if (!e || e.key === "Enter" || e.type === "click") {
-      if (debouncedSearch.trim()) {
-        setCity(debouncedSearch);
-        refetch();
-      }
-    }
+  const handleSearch = (selectedCity: string) => {
+    setCity(selectedCity);
+    refetch();
   };
 
   return (
-    <div className="flex flex-col lg:flex-row items-start w-full  text-gray-200 p-4 lg:p-6 gap-4 lg:gap-6  ">
+    <div className="flex flex-col lg:flex-row items-start w-full text-gray-200 p-4 lg:p-6 gap-4 lg:gap-6">
       {/* Left Column */}
-      <div className="flex flex-col w-full lg:w-[30%] bg-[#3E3B3B] text-lg p-6 lg:p-10 rounded-3xl h-full ">
-        {/* Search Bar */}
-        <div className="relative w-full  flex items-center mb-4">
-          <input
-            type="text"
-            placeholder="Enter a city"
-            value={searchCity}
-            onChange={(e) => setSearchCity(e.target.value)}
-            onKeyDown={handleSearch}
-            maxLength={30}
-            className="w-full p-3 rounded-3xl bg-[#C2D4D3] text-[#7E7C7C] placeholder-[#7E7C7C] font-medium"
-          />
-          <button onClick={() => handleSearch()} className="absolute right-3">
-            <FaSearchLocation className="text-[#7E7C7C] text-xl" />
-          </button>
-        </div>
-
-        {cities && cities.length > 0 && (
-          <ul className="bg-[#2C2929] border mt-1 w-full max-h-60 overflow-auto shadow-md rounded-3xl mb-4">
-            {cities.map((city: any) => (
-              <li
-                key={`${city.name}-${city.country}`} // Unique key
-                className="p-2 border-b hover:bg-[#3E3B3B]"
-              >
-                <button
-                  className="w-full text-left cursor-pointer"
-                  onClick={() => {
-                    setSearchCity(city.name);
-                    setCity(city.name);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      setSearchCity(city.name);
-                      setCity(city.name);
-                    }
-                  }}
-                >
-                  {city.name}, {city.country}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      <div className="flex flex-col w-full lg:w-[30%] bg-[#3E3B3B] text-lg p-6 lg:p-10 rounded-3xl h-full">
+        {/* Search Component */}
+        <SearchBar onSearch={handleSearch} />
 
         {/* Weather Information */}
         <div className="flex flex-col items-center justify-center gap-y-10">
@@ -148,9 +96,9 @@ const DisplayWeather = () => {
                   <p className="text-2xl lg:text-3xl font-bold text-white">
                     {data.name}
                   </p>
-                  <span className="text-lg text-gray-400">
+                  <p className="text-lg text-gray-400">
                     {isCountryLoading ? "Loading..." : countryName}
-                  </span>
+                  </p>
                 </div>
 
                 <hr className="mt-3 border-t-2 w-full" />
